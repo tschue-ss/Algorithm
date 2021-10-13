@@ -1,10 +1,12 @@
 package BJ.BJ1325;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -36,35 +38,29 @@ import BJ.Common.StringUtils;
 public class Main {
 	static int N, M;
 	static ArrayList<Integer>[] Graph;
-	static int[] Memo, Answer;
+	static int[] Answer;
 	
 	private static int stoi(String str) {
 		return Integer.parseInt(str);
 	}
 	
 	public static void main(String[] args) throws IOException {
-		String[] tc = {
-				"Input.txt"
-				, "Input1.txt"
-				, "Input2.txt"
-				, "Input3.txt"
-				, "Input4.txt"
-		};
+		String fileName = "Input.txt";
+//		String fileName = "Input1.txt";
+//		String fileName = "Input2.txt";
+//		String fileName = "Input3.txt";
+//		String fileName = "Input4.txt";
+//		String fileName = "Input9.txt";
 		
-		for (String fileName : tc) {
-			System.setIn(new FileInputStream(new File(StringUtils.getFilePath(Main.class) + "/" + fileName)));
-			BJ1325();
-		}
-	}
-	public static void BJ1325() throws IOException {	
+		System.setIn(new FileInputStream(new File(StringUtils.getFilePath(Main.class) + "/" + fileName)));
+		
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringBuffer sb = new StringBuffer();
+		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 		StringTokenizer st = new StringTokenizer(br.readLine());
 		
 		N = stoi(st.nextToken());
 		M = stoi(st.nextToken());
 		Graph = new ArrayList[N + 1];
-		Memo = new int[N + 1];
 		Answer = new int[N + 1];
 		
 		for (int n = 1; n <= N; n++) {
@@ -75,68 +71,47 @@ public class Main {
 			st = new StringTokenizer(br.readLine());
 			int from = stoi(st.nextToken());
 			int to = stoi(st.nextToken());
-			Graph[from].add(to);
-			Memo[to]++;
+			Graph[to].add(from);
 		}
+		
+		int max = -1;
 		
 		// 1 ~ N까지 Loop를 돌면서 solving Logic을 수행
-//		for (int n = 1; n <= N; n++) {
-//			int temp = solve(n);
-//			if (temp > max) {
-//				sb = new StringBuffer();
-//				sb.append(n);
-//				max = temp;
-//			} else if (temp == max) {
-//				sb.append(" " + n);
-//			}
-//		}
+		for (int n = 1; n <= N; n++) {
+			solve(n);
+			max = Math.max(Answer[n], max);
+		}
 		
 		for (int n = 1; n <= N; n++) {
-			if (Memo[n] > 0) {
-				solve2(n);
-			}
-		}
-
-		int max = -1;
-		for (int n = 1; n <= N; n++) {
-			if (max < Answer[n]) {
-				sb = new StringBuffer();
-				sb.append(n);
-				max = Answer[n];
-			} else if (max == Answer[n]) {
-				sb.append(" " + n);
+			if (max == Answer[n]) {
+				bw.write(n + " ");
 			}
 		}
 		
-		System.out.println(sb.toString());
-	}
-	
-	private static void solve2(int idx) {
-		Answer[idx] += Memo[idx];
-		for (int n : Graph[idx]) {
-			Answer[n] += Answer[idx];
-		}
-		Memo[idx] = 0;
+		bw.flush();
+		bw.close();
+		br.close();
 	}
 
-	private static int solve(int idx) {
+	private static void solve(int idx) {
 		boolean[] visited = new boolean[N + 1];
 		Queue<Integer> q = new LinkedList<Integer>();
 		
 		for (int n : Graph[idx]) {
 			q.add(n); 
 		}
-		int answer = 0; 
+		
+		visited[idx] = true;
+		Answer[idx]++;
 		
 		while (!q.isEmpty()) {
 			int nowIdx = q.poll();
 			visited[nowIdx] = true;
-			answer++;
+			Answer[idx]++;
 			for (int nextIdx : Graph[nowIdx]) {
 				if (visited[nextIdx]) continue;
 				q.add(nextIdx);
 			}
 		}
-		return answer;
 	}
 }
