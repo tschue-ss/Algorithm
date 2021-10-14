@@ -2,17 +2,13 @@ package BJ.BJ1325;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.StringTokenizer;
-
-import BJ.Common.StringUtils; 
+import java.util.StringTokenizer; 
 
 /** 
  * 
@@ -39,21 +35,13 @@ public class Main {
 	static int N, M;
 	static ArrayList<Integer>[] Graph;
 	static int[] Answer;
+	static boolean[] visited;
 	
 	private static int stoi(String str) {
 		return Integer.parseInt(str);
 	}
 	
 	public static void main(String[] args) throws IOException {
-		String fileName = "Input.txt";
-//		String fileName = "Input1.txt";
-//		String fileName = "Input2.txt";
-//		String fileName = "Input3.txt";
-//		String fileName = "Input4.txt";
-//		String fileName = "Input9.txt";
-		
-		System.setIn(new FileInputStream(new File(StringUtils.getFilePath(Main.class) + "/" + fileName)));
-		
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 		StringTokenizer st = new StringTokenizer(br.readLine());
@@ -71,17 +59,23 @@ public class Main {
 			st = new StringTokenizer(br.readLine());
 			int from = stoi(st.nextToken());
 			int to = stoi(st.nextToken());
-			Graph[to].add(from);
+			Graph[from].add(to);
 		}
-		
-		int max = -1;
 		
 		// 1 ~ N까지 Loop를 돌면서 solving Logic을 수행
 		for (int n = 1; n <= N; n++) {
+			visited = new boolean[N + 1];
+			visited[n] = true;
 			solve(n);
-			max = Math.max(Answer[n], max);
 		}
 		
+		// 산출 한 값중 최대 값을 max변수에 적재
+		int max = -1;
+		for (int n = 1; n <= N; n++) {
+			max = Math.max(max, Answer[n]);
+		}
+		
+		// max 값과 같은 값을 가진 Node번호를 오름차순으로 bw에 저장
 		for (int n = 1; n <= N; n++) {
 			if (max == Answer[n]) {
 				bw.write(n + " ");
@@ -90,26 +84,18 @@ public class Main {
 		
 		bw.flush();
 		bw.close();
-		br.close();
 	}
-
+	
 	private static void solve(int idx) {
-		boolean[] visited = new boolean[N + 1];
 		Queue<Integer> q = new LinkedList<Integer>();
-		
-		for (int n : Graph[idx]) {
-			q.add(n); 
-		}
-		
-		visited[idx] = true;
-		Answer[idx]++;
-		
+		q.add(idx);
 		while (!q.isEmpty()) {
-			int nowIdx = q.poll();
-			visited[nowIdx] = true;
-			Answer[idx]++;
-			for (int nextIdx : Graph[nowIdx]) {
+			idx = q.poll();
+			
+			for (int nextIdx : Graph[idx]) {
 				if (visited[nextIdx]) continue;
+				visited[nextIdx] = true;
+				Answer[nextIdx]++;
 				q.add(nextIdx);
 			}
 		}
