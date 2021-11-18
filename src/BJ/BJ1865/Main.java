@@ -61,7 +61,6 @@ public class Main {
 			W = stoi(st.nextToken());		// 웜홀 (Minus 간선)
 			
 			Answer = new int[N + 1];
-			Arrays.fill(Answer, INF);
 			
 			Adj = new ArrayList[N + 1]; 	// 인접 리스트
 			for (int n = 0; n <= N; n++) {
@@ -89,51 +88,50 @@ public class Main {
 				Adj[s].add(new Node(e, c));
 			}
 			
-			if (bellmanFord()) {
-				System.out.println("YES");
-			} else {
-				System.out.println("NO");
-	        }
+			boolean isCycle = false;
+			
+            for (int n = 1; n <= N; n++) {
+                if (bellmanFord(n)) {
+                	isCycle = true;
+                    System.out.println("YES");
+                    break;
+                }
+            }
+ 
+            if (!isCycle) {
+                System.out.println("NO");
+            }
 		}
 		br.close();
 	}
 
-	private static boolean bellmanFord() {
-		Answer[1] = 0;
-		boolean updateFlag = false;
+	private static boolean bellmanFord(int idx) {
+		Arrays.fill(Answer, INF);
+		Answer[idx] = 0;
+		boolean isCycle = false;
 		
 		for (int i = 1; i < N; i++) {
-			updateFlag = false;
+			isCycle = false;
 			
 			for (int n = 1; n <= N; n++) {
 				for (Node next : Adj[n]) {
-					if (Answer[n] == INF) break;
-					
-					int nextIdx = next.idx;
-					int nextCost = next.cost;
-					
-					if (Answer[nextIdx] > Answer[n] + nextCost) {
-						Answer[nextIdx] = Answer[n] + nextCost; 
-						updateFlag = true;
+					if (Answer[n] != INF && Answer[next.idx] > Answer[n] + next.cost) {
+						Answer[next.idx] = Answer[n] + next.cost; 
+						isCycle = true;
 					}
 				}
 				
-				// Cycle이 존재하지 않음
-				if (!updateFlag) {
-					break;
-				}
 			}
 			
-			// 음수의 Cycle이 존재
-			if (updateFlag) {
-				for (int n = 1; n <= N; n++) {
-					for (Node next : Adj[n]) {
-						if (Answer[n] == INF) break;
-						
-						if (Answer[next.idx] > Answer[n] + next.cost) {
-							return true;
-						}
-					}
+			// Cycle이 존재하지 않음
+			if (!isCycle) break;
+		}
+			
+		// 음수의 Cycle이 존재
+		if (isCycle) {
+			for (int n = 1; n <= N; n++) {
+				for (Node next : Adj[n]) {
+					if (Answer[n] != INF && Answer[next.idx] > Answer[n] + next.cost) return true;
 				}
 			}
 		}
